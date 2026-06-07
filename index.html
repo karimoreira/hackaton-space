@@ -2,26 +2,202 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.github.com; style-src 'self'; script-src 'self';">
-                <title>AstroGit - Explorador de Constelações de Código</title>
-                    <style>
-                            body { margin: 0; overflow: hidden; background-color: #03040b; color: #fff; font-family: monospace; }
-                                    #ui-layer { position: absolute; top: 20px; left: 20px; z-index: 10; }
-                                            input { background: rgba(255,255,255,0.1); border: 1px solid #58a6ff; color: #fff; padding: 10px; outline: none; }
-                                                    button { background: #58a6ff; border: none; padding: 10px 15px; color: #000; cursor: pointer; font-weight: bold; }
-                                                            #universe-canvas { display: block; width: 100vw; height: 100vh; }
-                                                                </style>
-                                                                </head>
-                                                                <body>
-                                                                    <div id="ui-layer">
-                                                                            <input type="text" id="github-username" placeholder="Digite um usuário do GitHub..." autocomplete="off">
-                                                                                    <button id="explore-btn">Mapear Galáxia</button>
-                                                                                            <p id="status-message"></p>
-                                                                                                </div>
-                                                                                                    
-                                                                                                        <canvas id="universe-canvas"></canvas>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.github.com; style-src 'self' 'unsafe-inline'; script-src 'self';">
+    <title>AstroGit - Constelações de Código</title>
+    <style>
+        :root {
+            --bg-0: #02050d;
+            --bg-1: #050916;
+            --panel: rgba(12, 18, 34, 0.72);
+            --panel-border: rgba(126, 169, 255, 0.18);
+            --accent: #6ea8fe;
+            --accent-strong: #91c0ff;
+            --text: #f3f7ff;
+            --muted: #9aa8c7;
+            --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+        }
 
-                                                                                                            <script type="module" src="./src/main.js"></script>
-                                                                                                            </body>
-                                                                                                            </html>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            overflow: hidden;
+            color: var(--text);
+            font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(110, 168, 254, 0.18), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(123, 97, 255, 0.12), transparent 24%),
+                linear-gradient(180deg, var(--bg-1), var(--bg-0));
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(rgba(255, 255, 255, 0.09) 0.9px, transparent 0.9px),
+                radial-gradient(rgba(255, 255, 255, 0.05) 0.7px, transparent 0.7px);
+            background-position: 0 0, 24px 24px;
+            background-size: 48px 48px;
+            opacity: 0.2;
+            mix-blend-mode: screen;
+        }
+
+        #ui-panel {
+            position: absolute;
+            top: 28px;
+            left: 28px;
+            z-index: 10;
+            width: min(420px, calc(100vw - 56px));
+            padding: 24px;
+            border: 1px solid var(--panel-border);
+            border-radius: 22px;
+            background: var(--panel);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: var(--shadow);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            color: var(--muted);
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .eyebrow::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-strong);
+            box-shadow: 0 0 12px var(--accent-strong);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        .subtitle {
+            margin: 14px 0 22px;
+            color: var(--muted);
+            line-height: 1.6;
+            font-size: 0.98rem;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        button {
+            appearance: none;
+            border: 0;
+            border-radius: 14px;
+            padding: 14px 16px;
+            color: #06111e;
+            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+            box-shadow: 0 14px 28px rgba(110, 168, 254, 0.28);
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.04);
+            box-shadow: 0 18px 34px rgba(110, 168, 254, 0.36);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #status-message {
+            margin: 0;
+            min-height: 1.6em;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .hint-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .hint {
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        #universe-canvas {
+            position: fixed;
+            inset: 0;
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        @media (max-width: 640px) {
+            #ui-panel {
+                top: 16px;
+                left: 16px;
+                width: calc(100vw - 32px);
+                padding: 18px;
+            }
+
+            .subtitle {
+                font-size: 0.94rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main id="ui-panel" aria-label="AstroGit controls">
+        <div class="eyebrow">Explorador orbital</div>
+        <h1>AstroGit</h1>
+        <p class="subtitle">Uma simulação visual que transforma dados em constelações em órbita. Abra a galáxia com um clique.</p>
+        <div class="actions">
+            <button id="explore-btn" type="button">Mapear Galáxia</button>
+            <p id="status-message">Sistemas inativos. Pronto para iniciar.</p>
+        </div>
+        <div class="hint-row" aria-hidden="true">
+            <span class="hint">Canvas full screen</span>
+            <span class="hint">Simulação local</span>
+            <span class="hint">Sem input manual</span>
+        </div>
+    </main>
+
+    <canvas id="universe-canvas"></canvas>
+
+    <script type="module" src="./src/main.js"></script>
+</body>
+</html>

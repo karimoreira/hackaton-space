@@ -33,13 +33,25 @@ class AppController {
     }
 
     _generateMockData() {
-        return [
-            { id: 101, name: 'core-api', language: 'TypeScript', mass: 45, url: '#' },
-            { id: 102, name: 'web-client', language: 'JavaScript', mass: 30, url: '#' },
-            { id: 103, name: 'data-pipeline', language: 'Python', mass: 25, url: '#' },
-            { id: 104, name: 'infra-tools', language: 'Go', mass: 20, url: '#' },
-            { id: 105, name: 'design-system', language: 'CSS', mass: 15, url: '#' },
-        ];
+        const mockData = [];
+        const languages = ['JavaScript', 'Python', 'Java', 'TypeScript', 'C++', 'Rust', 'Go', 'HTML', 'Ruby'];
+        const prefixes = ['core', 'api', 'web', 'service', 'engine', 'data', 'auth', 'micro'];
+
+        for (let i = 1; i <= 30; i++) {
+            const lang = languages[Math.floor(Math.random() * languages.length)];
+            const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+            const mass = Math.floor(Math.random() * 80) + 5;
+
+            mockData.push({
+                id: 1000 + i,
+                name: `${prefix}-system-${i}`,
+                language: lang,
+                mass: mass,
+                url: `https://github.com/mock/${prefix}-system-${i}`,
+            });
+        }
+
+        return mockData;
     }
 }
 

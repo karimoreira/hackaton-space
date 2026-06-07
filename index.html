@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.github.com; style-src 'self'; script-src 'self';">
+                <title>AstroGit - Explorador de Constelações de Código</title>
+                    <style>
+                            body { margin: 0; overflow: hidden; background-color: #03040b; color: #fff; font-family: monospace; }
+                                    #ui-layer { position: absolute; top: 20px; left: 20px; z-index: 10; }
+                                            input { background: rgba(255,255,255,0.1); border: 1px solid #58a6ff; color: #fff; padding: 10px; outline: none; }
+                                                    button { background: #58a6ff; border: none; padding: 10px 15px; color: #000; cursor: pointer; font-weight: bold; }
+                                                            #universe-canvas { display: block; width: 100vw; height: 100vh; }
+                                                                </style>
+                                                                </head>
+                                                                <body>
+                                                                    <div id="ui-layer">
+                                                                            <input type="text" id="github-username" placeholder="Digite um usuário do GitHub..." autocomplete="off">
+                                                                                    <button id="explore-btn">Mapear Galáxia</button>
+                                                                                            <p id="status-message"></p>
+                                                                                                </div>
+                                                                                                    
+                                                                                                        <canvas id="universe-canvas"></canvas>
+
+                                                                                                            <script type="module" src="./src/main.js"></script>
+                                                                                                            </body>
+                                                                                                            </html>

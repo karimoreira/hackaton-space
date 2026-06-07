@@ -8,16 +8,27 @@ export class GitHubService {
             throw new Error('Formato de usuário inválido.');
         }
 
-        const response = await fetch(`${this.baseUrl}/${encodeURIComponent(username)}/repos?per_page=100`);
+        const allRepositories = [];
+        let page = 1;
+        let shouldContinue = true;
 
-        if (!response.ok) {
-            if (response.status === 404) throw new Error('Cientista de dados não encontrado.');
-            if (response.status === 403) throw new Error('Limite de varredura da API excedido.');
-            throw new Error('Anomalia de comunicação com os servidores.');
+        while (shouldContinue) {
+            const response = await fetch(`${this.baseUrl}/${encodeURIComponent(username)}/repos?per_page=100&page=${page}`);
+
+            if (!response.ok) {
+                if (response.status === 404) throw new Error('Usuário não encontrado.');
+                if (response.status === 403) throw new Error('Limite de requisições da API excedido.');
+                throw new Error('Anomalia de comunicação com os servidores.');
+            }
+
+            const repos = await response.json();
+            allRepositories.push(...repos.map((repo) => this._mapToCelestialBody(repo)));
+
+            shouldContinue = repos.length === 100;
+            page += 1;
         }
 
-        const repos = await response.json();
-        return repos.map((repo) => this._mapToCelestialBody(repo));
+        return allRepositories;
     }
 
     _mapToCelestialBody(repo) {

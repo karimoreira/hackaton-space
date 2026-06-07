@@ -111,6 +111,31 @@
             gap: 14px;
         }
 
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 14px 16px;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.04);
+            outline: none;
+            font-size: 0.98rem;
+        }
+
+        input::placeholder {
+            color: rgba(154, 168, 199, 0.72);
+        }
+
+        input:focus {
+            border-color: rgba(145, 192, 255, 0.55);
+            box-shadow: 0 0 0 4px rgba(110, 168, 254, 0.12);
+        }
+
         button {
             appearance: none;
             border: 0;
@@ -184,15 +209,18 @@
     <main id="ui-panel" aria-label="AstroGit controls">
         <div class="eyebrow">Explorador orbital</div>
         <h1>AstroGit</h1>
-        <p class="subtitle">Uma simulação visual que transforma dados em constelações em órbita. Abra a galáxia com um clique.</p>
+        <p class="subtitle">Digite um usuário do GitHub e veja os repositórios virarem constelações em órbita.</p>
         <div class="actions">
-            <button id="explore-btn" type="button">Mapear Galáxia</button>
+            <div class="input-group">
+                <input type="text" id="github-username" placeholder="Ex: torvalds" autocomplete="off">
+                <button id="explore-btn" type="button">Mapear</button>
+            </div>
             <p id="status-message">Sistemas inativos. Pronto para iniciar.</p>
         </div>
         <div class="hint-row" aria-hidden="true">
-            <span class="hint">Canvas full screen</span>
-            <span class="hint">Simulação local</span>
-            <span class="hint">Sem input manual</span>
+            <span class="hint">Busca real na API</span>
+            <span class="hint">Até 100 repositórios por página</span>
+            <span class="hint">Visualização dinâmica</span>
         </div>
     </main>
 

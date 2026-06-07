@@ -1,7 +1,9 @@
+import { GitHubService } from './services/GitHubService.js';
 import { AstroEngine } from './engine/AstroEngine.js';
 
 class AppController {
-    constructor(astroEngine) {
+    constructor(gitHubService, astroEngine) {
+        this.service = gitHubService;
         this.engine = astroEngine;
         this.initEventListeners();
     }
@@ -10,52 +12,40 @@ class AppController {
         const btn = document.getElementById('explore-btn');
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            this.handleSearchMock();
+            this.handleSearch();
         });
     }
 
-    handleSearchMock() {
+    async handleSearch() {
+        const input = document.getElementById('github-username');
         const statusEl = document.getElementById('status-message');
-        statusEl.textContent = 'Iniciando simulação orbital isolada...';
+        const username = input.value.trim();
+
+        if (!username) {
+            statusEl.textContent = 'Digite um usuário do GitHub para continuar.';
+            return;
+        }
+
+        statusEl.textContent = 'Buscando repositórios reais no GitHub...';
 
         try {
-            const mockData = this._generateMockData();
+            const repoData = await this.service.fetchUserRepositories(username);
 
-            statusEl.textContent = `Simulação ativa: ${mockData.length} sistemas estelares em órbita.`;
+            statusEl.textContent = `${repoData.length} repositórios encontrados para ${username}.`;
 
-            this.engine.loadGalaxy(mockData);
+            this.engine.loadGalaxy(repoData);
             this.engine.startRenderLoop();
         } catch (error) {
-            statusEl.textContent = 'Falha crítica na renderização da simulação.';
+            statusEl.textContent = error.message;
             this.engine.destroy();
             console.error(error);
         }
     }
 
-    _generateMockData() {
-        const mockData = [];
-        const languages = ['JavaScript', 'Python', 'Java', 'TypeScript', 'C++', 'Rust', 'Go', 'HTML', 'Ruby'];
-        const prefixes = ['core', 'api', 'web', 'service', 'engine', 'data', 'auth', 'micro'];
-
-        for (let i = 1; i <= 30; i++) {
-            const lang = languages[Math.floor(Math.random() * languages.length)];
-            const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-            const mass = Math.floor(Math.random() * 80) + 5;
-
-            mockData.push({
-                id: 1000 + i,
-                name: `${prefix}-system-${i}`,
-                language: lang,
-                mass: mass,
-                url: `https://github.com/mock/${prefix}-system-${i}`,
-            });
-        }
-
-        return mockData;
-    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const apiService = new GitHubService();
     const graphicsEngine = new AstroEngine('universe-canvas');
-    new AppController(graphicsEngine);
+    new AppController(apiService, graphicsEngine);
 });
